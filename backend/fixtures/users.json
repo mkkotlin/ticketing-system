@@ -1,0 +1,20 @@
+[
+  {
+    "username": "admin",
+    "email": "admin@ticketing.com",
+    "password": "Password123",
+    "role": "ADMIN"
+  },
+  {
+    "username": "support_agent",
+    "email": "agent@ticketing.com",
+    "password": "Password123",
+    "role": "AGENT"
+  },
+  {
+    "username": "customer_john",
+    "email": "john@example.com",
+    "password": "Password123",
+    "role": "CUSTOMER"
+  }
+]

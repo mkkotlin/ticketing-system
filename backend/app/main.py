@@ -7,9 +7,12 @@ from app.schemas import UserCreate, UserResponse, UserUpdate
 from app.models import User
 from app.routers import auth
 from app.security import hash_password
+from app.dependencies import get_current_user, require_role
+from app.ticketing import ticket
 
 app = FastAPI(title="Ticketing System")
 app.include_router(auth.router)
+app.include_router(ticket.router)
 
 # Base.metadata.create_all(bind=engine)
 
@@ -42,7 +45,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.get("/users", response_model=list[UserResponse])
+@app.get("/users", response_model=list[UserResponse], dependencies=[Depends(get_current_user)])
 def get_users(db: Session = Depends(get_db)):
     statement = select(User)
     result = db.execute(statement)
@@ -81,7 +84,7 @@ def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_d
 
 
 @app.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role("ADMIN"))):
     statement = select(User).where(User.id == user_id)
     result = db.execute(statement)
 

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "Technical Support"
+  },
+  {
+    "id": 2,
+    "name": "Billing"
+  },
+  {
+    "id": 3,
+    "name": "Feature Request"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Cannot log in to my account",
+    "description": "I keep getting an invalid credentials error even after resetting my password.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "category_id": 1,
+    "created_by_username": "customer_john"
+  },
+  {
+    "title": "Double charge on subscription",
+    "description": "My card was charged twice for the monthly billing cycle on August 20th.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "category_id": 2,
+    "created_by_username": "customer_john"
+  },
+  {
+    "title": "Add dark mode to user settings",
+    "description": "Please add a toggle for dark mode in the profile settings screen.",
+    "status": "OPEN",
+    "priority": "LOW",
+    "category_id": 3,
+    "created_by_username": "customer_john"
+  }
+]

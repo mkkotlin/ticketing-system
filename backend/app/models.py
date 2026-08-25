@@ -1,6 +1,8 @@
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, ForeignKey, Text, DateTime
+from datetime import datetime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
+from app.enums import TicketPriority, TicketStatus
 
 class User(Base):
     __tablename__ = "user"
@@ -11,3 +13,28 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
 
     role: Mapped[str] = mapped_column(String(20), default="CUSTOMER", nullable=False)
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+
+class Ticket(Base):
+    __tablename__ = "tickets"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[TicketStatus] = mapped_column(default=TicketStatus.OPEN, nullable=False)
+    priority: Mapped[TicketPriority] = mapped_column(default=TicketPriority.MEDIUM, nullable=False)
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    assigned_to_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    creator: Mapped["User"] = relationship(foreign_keys=[created_by_id])
+    assignee: Mapped["User | None"] = relationship(foreign_keys=[assigned_to_id])
+    category: Mapped["Category"] = relationship()
