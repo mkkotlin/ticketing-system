@@ -2,11 +2,14 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from database import engine, Base, get_db
-from schemas import UserCreate, UserResponse, UserUpdate
-from models import User
+from app.database import engine, Base, get_db
+from app.schemas import UserCreate, UserResponse, UserUpdate
+from app.models import User
+from app.routers import auth
+from app.security import hash_password
 
 app = FastAPI(title="Ticketing System")
+app.include_router(auth.router)
 
 # Base.metadata.create_all(bind=engine)
 
@@ -24,14 +27,18 @@ def database_test():
 
 @app.post("/users", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    new_user = User(username=user.username, email=user.email)
+    new_user = User(
+        username=user.username,
+        email=user.email,
+        password_hash=hash_password(user.password)
+    )
     db.add(new_user)
     try:
         db.commit()
         db.refresh(new_user)
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=404, detail="Username or email already exists")
+        raise HTTPException(status_code=409, detail="Username or email already exists")
     return new_user
 
 
@@ -85,3 +92,12 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+# from app.dependencies import require_role
+# @app.get("/admin-test")
+# def admin_test(current_user: User = Depends(require_role("ADMIN"))):
+#     return {"message":"Welcome Admin", "username": current_user.username }
+
+# @app.get("/agent-test")
+# def agent_test(current_user: User = Depends(require_role("ADMIN", "AGENT"))):
+#     return {"message":"Agent access granted", "username": current_user.username }
