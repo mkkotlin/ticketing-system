@@ -10,7 +10,7 @@ from app.dependencies import get_current_user
 router = APIRouter(
     prefix="/tickets",
     tags=["Tickets"],
-    dependencies=[Depends(get_current_user)]
+    # dependencies=[Depends(get_current_user)]
 )
 
 @router.get("/", response_model=list[TicketResponse])
