@@ -9,10 +9,12 @@ from app.routers import auth
 from app.security import hash_password
 from app.dependencies import get_current_user, require_role
 from app.ticketing import ticket
+from app.category import category
 
 app = FastAPI(title="Ticketing System")
 app.include_router(auth.router)
 app.include_router(ticket.router)
+app.include_router(category.router)
 
 # Base.metadata.create_all(bind=engine)
 
@@ -45,7 +47,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.get("/users", response_model=list[UserResponse], dependencies=[Depends(get_current_user)])
+@app.get("/users", response_model=list[UserResponse])
 def get_users(db: Session = Depends(get_db)):
     statement = select(User)
     result = db.execute(statement)

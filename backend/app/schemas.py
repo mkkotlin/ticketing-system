@@ -48,3 +48,13 @@ class TicketCreate(BaseModel):
     description: str = Field(min_length=10)
     category_id: int
     priority: TicketPriority = TicketPriority.MEDIUM
+
+
+class CategoryResponse(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes":True}
+
+class CategoryCreate(BaseModel):
+    name: str = Field(min_length=5, max_length=200)

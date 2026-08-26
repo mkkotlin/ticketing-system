@@ -1,5 +1,17 @@
 [
   {
+    "username": "mayank",
+    "email": "mayank@ticketing.com",
+    "password": "Password123",
+    "role": "ADMIN"
+  },
+  {
+    "username": "kimiko",
+    "email": "kimiko@ticketing.com",
+    "password": "Password123",
+    "role": "AGENT"
+  },
+  {
     "username": "admin",
     "email": "admin@ticketing.com",
     "password": "Password123",
