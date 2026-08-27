@@ -1,7 +1,9 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
-from app.enums import TicketPriority, TicketStatus
+from app.enums import TicketPriority, TicketStatus, UserRole
 
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)
@@ -95,3 +97,7 @@ class TicketListResponse(BaseModel):
     page: int
     limit: int
     pages: int
+
+
+class UserRoleUpdate(BaseModel):
+    role: Literal[UserRole.AGENT, UserRole.CUSTOMER]
