@@ -34,9 +34,11 @@ class Ticket(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    closed_by_id: Mapped[int | None] = mapped_column(ForeignKey("user.id"), nullable=True)
 
     creator: Mapped["User"] = relationship(foreign_keys=[created_by_id])
     assignee: Mapped["User | None"] = relationship(foreign_keys=[assigned_to_id])
+    closed_by: Mapped["User | None"] = relationship(foreign_keys=[closed_by_id])
     category: Mapped["Category"] = relationship()
 
 

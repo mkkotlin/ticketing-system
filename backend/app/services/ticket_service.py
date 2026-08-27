@@ -84,6 +84,11 @@ class TicketService:
         elif new_status != TicketStatus.RESOLVED:
             ticket.resolved_at = None
 
+        if new_status == TicketStatus.CLOSED:
+            ticket.closed_by_id = current_user_id
+        else:
+            ticket.closed_by_id = None
+
         ActivityService.log(
             db=db,
             ticket_id=ticket.id,
@@ -94,7 +99,7 @@ class TicketService:
         )
 
     @staticmethod
-    def assign_ticket(db: Session, ticket: Ticket, agent_id: int, current_user_id: int) -> Ticket:
+    def assign_ticket(db: Session, ticket: Ticket, agent_id: int, current_user: User) -> Ticket:
         agent = db.execute(select(User).where(User.id == agent_id)).scalar_one_or_none()
 
         if agent is None:
@@ -110,7 +115,7 @@ class TicketService:
         ActivityService.log(
             db=db,
             ticket_id=ticket.id,
-            user_id=current_user_id,
+            user_id=current_user.id,
             action="ASSIGNED",
             old_value=(
                 str(old_agent_id)

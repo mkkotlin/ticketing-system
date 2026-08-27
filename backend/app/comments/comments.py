@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from ..enums import UserRole
 
-from ..database import get_db
+from ..database import get_db, get_transaction
 from ..dependencies import get_current_user
 from ..models import Comment, Ticket, User
 from ..schemas import CommentCreate, CommentResponse
@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 @router.post("", response_model=CommentResponse, status_code=201)
-def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_transaction)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
@@ -43,8 +43,6 @@ def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: Us
         user_id=current_user.id,
         action="COMMENT_ADDED"
     )
-    db.commit()
-    db.refresh(comment)
     return comment
 
 

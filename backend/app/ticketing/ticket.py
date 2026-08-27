@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import get_db, get_transaction
 from app.models import Category, Ticket, User
 from app.schemas import TicketResponse, TicketCreate
 from app.dependencies import get_current_user, require_role
@@ -103,8 +103,8 @@ def get_ticket(ticket_id: int, current_user: User = Depends(get_current_user), d
     return ticket
 
 
-@router.post("/", response_model=TicketResponse)
-def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.post("/", response_model=TicketResponse, status_code=201)
+def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_transaction), current_user: User = Depends(get_current_user)):
 
     category = db.execute(select(Category).where(Category.id == ticket_data.category_id)).scalar_one_or_none()
     if category is None:
@@ -119,44 +119,36 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db), curr
     
     db.add(new_ticket)
     db.flush()
-    ActivityService.log(db=db, ticket_id=new_ticket.id, user_id=current_user.id,action="CREATED")
-    db.commit()
-    db.refresh(new_ticket)
+    ActivityService.log(db=db, ticket_id=new_ticket.id, user_id=current_user.id, action="CREATED")
     return new_ticket
 
 @router.patch("/{ticket_id}", response_model=TicketResponse)
-def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_transaction)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     TicketService.update_ticket(db = db, ticket=ticket, current_user=current_user, data=ticket_data)
-    db.commit()
-    db.refresh(ticket)
     return ticket
 
 @router.post("/{ticket_id}/assign", response_model=TicketResponse)
-def assign_ticket(data: TicketAssign, ticket_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
+def assign_ticket(ticket_id: int, data: TicketAssign, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_transaction)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id, current_user_id=current_user.id)
-    db.commit()
-    db.refresh(ticket)
+    TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id, current_user=current_user)
     return ticket
 
 
 @router.post("/{ticket_id}/unassign", response_model=TicketResponse)
-def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
+def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_transaction)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     TicketService.unassign_ticket(ticket)
-    db.commit()
-    db.refresh(ticket)
     return ticket

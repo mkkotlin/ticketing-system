@@ -3,7 +3,7 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.database import get_db
+from app.database import get_db, get_transaction
 from app.models import User
 from app.schemas import Token, UserCreate, UserResponse
 from app.security import create_access_token, verify_password, hash_password
@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.post("/register", response_model=UserResponse)
-def register(user_data: UserCreate, db: Session = Depends(get_db)):
+def register(user_data: UserCreate, db: Session = Depends(get_transaction)):
     existing_user = db.execute(
         select(User).where(
             or_(User.username == user_data.username, User.email == user_data.email)
@@ -34,8 +34,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
         role="CUSTOMER"
     )
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    db.flush()
 
     return user
 

@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from app.database import get_db
+from app.database import get_db, get_transaction
 from app.models import Category
 from app.schemas import CategoryCreate, CategoryResponse
 
@@ -18,7 +18,7 @@ def get_categories(db: Session = Depends(get_db)):
     return result.scalars().all()
 
 @router.post("")
-def create_category(category_data: CategoryCreate, db: Session = Depends(get_db)):
+def create_category(category_data: CategoryCreate, db: Session = Depends(get_transaction)):
     category = db.execute(select(Category).where(Category.name == category_data.name)).scalar_one_or_none()
     
     if category:
@@ -26,7 +26,6 @@ def create_category(category_data: CategoryCreate, db: Session = Depends(get_db)
 
     new_category = Category(name = category_data.name)
     db.add(new_category)
-    db.commit()
-    db.refresh(new_category)    
+    db.flush()
 
     return CategoryResponse.model_validate(new_category)
