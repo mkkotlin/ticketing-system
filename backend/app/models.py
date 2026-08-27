@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey, Text, DateTime
+from sqlalchemy import Boolean, String, ForeignKey, Text, DateTime
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -11,7 +11,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="CUSTOMER", nullable=False)
 
 class Category(Base):

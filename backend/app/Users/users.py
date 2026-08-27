@@ -4,7 +4,7 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.database import engine, get_db
-from app.schemas import UserCreate, UserResponse, UserRoleUpdate, UserUpdate
+from app.schemas import UserCreate, UserResponse, UserRoleUpdate, UserStatusUpdate, UserUpdate
 from app.models import User
 from app.routers import auth
 from app.security import hash_password
@@ -62,6 +62,22 @@ def delete_user(user_id: int, current_user: User = Depends(require_role(UserRole
 
     db.delete(user)
     db.commit()
+
+
+@router.patch("/{user_id}/status", response_model=UserResponse)
+def solt_delete(user_id: int, data: UserStatusUpdate, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
+    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.id == current_user.id:
+        raise HTTPException(status_code=400, detail="You cannot change your own account status")
+
+    user.is_active = data.is_active
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 

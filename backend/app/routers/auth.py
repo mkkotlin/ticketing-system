@@ -57,6 +57,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             status_code=401,
             detail="Invalid username or password"
         )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="User account is inactive"
+        )
+
     token = create_access_token(user.id)
     return {"access_token": token,
             "token_type": "bearer"}

@@ -45,6 +45,9 @@ def get_current_user(
     if user is None:
         raise credentials_exception
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User account is inactive")
+
     return user
 
 def require_role(*allowed_roles: str)-> Callable:

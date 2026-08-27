@@ -22,6 +22,7 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     role: str
+    is_active: bool
 
     model_config = { "from_attributes":True }
 
@@ -101,3 +102,6 @@ class TicketListResponse(BaseModel):
 
 class UserRoleUpdate(BaseModel):
     role: Literal[UserRole.AGENT, UserRole.CUSTOMER]
+
+class UserStatusUpdate(BaseModel):
+    is_active: bool
