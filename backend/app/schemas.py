@@ -83,3 +83,7 @@ class CommentResponse(BaseModel):
     model_config={
         "from_attributes":True
     }
+
+
+class TicketAssign(BaseModel):
+    agent_id: int

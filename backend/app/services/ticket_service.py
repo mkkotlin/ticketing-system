@@ -69,3 +69,24 @@ class TicketService:
             ticket.resolved_at = datetime.now()
         elif new_status != TicketStatus.RESOLVED:
             ticket.resolved_at = None
+
+    @staticmethod
+    def assign_ticket(db: Session, ticket: Ticket, agent_id: int) -> Ticket:
+        agent = db.execute(select(User).where(User.id == agent_id)).scalar_one_or_none()
+
+        if agent is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if agent.role != UserRole.AGENT:
+            raise HTTPException(status_code=400, detail="Ticket can only be assigned to an agent")
+
+        ticket.assigned_to_id = agent.id
+        ticket.updated_at = datetime.now()
+        return ticket
+
+
+    @staticmethod
+    def unassign_ticket(ticket: Ticket) -> Ticket:
+        ticket.assigned_to_id = None
+        ticket.updated_at = datetime.now()
+        return ticket
