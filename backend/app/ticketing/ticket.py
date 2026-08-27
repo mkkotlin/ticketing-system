@@ -1,15 +1,16 @@
 from datetime import datetime
+from math import ceil
 from app.enums import TicketPriority, TicketStatus, UserRole
-from app.schemas import TicketAssign, TicketUpdate
+from app.schemas import TicketAssign, TicketListResponse, TicketUpdate
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Category, Ticket, User
 from app.schemas import TicketResponse, TicketCreate
 from app.dependencies import get_current_user, require_role
-from ..services.ticket_service import TicketService
+from app.services.ticket_service import TicketService
 
 router = APIRouter(
     prefix="/tickets",
@@ -17,13 +18,17 @@ router = APIRouter(
     # dependencies=[Depends(get_current_user)]
 )
 
-@router.get("", response_model=list[TicketResponse])
-def get_tickets(status:TicketStatus | None = None, 
+@router.get("", response_model=TicketListResponse)
+def get_tickets(search: str | None = None,
+                status:TicketStatus | None = None, 
                 priority: TicketPriority | None = None, 
-                category_id: int | None = None, 
+                category_id: int | None = None,
+                sort_by: str = Query("created_at", pattern="^(created_at|updated_at|priority|status)$"),
+                sort_order: str = Query("desc", pattern="^(asc|desc)$"), 
                 page:int = Query(1, ge=1),
-                limit: int = Query(10, ge=1, le=100)
-                , current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+                limit: int = Query(10, ge=1, le=100),
+                current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+
     statement = select(Ticket)
     if current_user.role == UserRole.CUSTOMER:
         statement = statement.where(Ticket.created_by_id == current_user.id)
@@ -33,6 +38,12 @@ def get_tickets(status:TicketStatus | None = None,
         pass
 
     # ------------ADMIN------------------
+    # ````````search````````
+    if search:
+        search_pattern = f"%{search}%"
+        statement = statement.where(Ticket.title.ilike(search_pattern) | Ticket.description.ilike(search_pattern))
+
+    # ````````````FILTERS````````````
     if status is not None:
         statement = statement.where(Ticket.status == status)
     if priority is not None:
@@ -41,13 +52,38 @@ def get_tickets(status:TicketStatus | None = None,
     if category_id is not None:
         statement = statement.where(Ticket.category_id == category_id)
 
+
+    # ````````````````COUNT ``````````````````````````
+    count_statement = (select(func.count()).select_from(statement.subquery()))
+    total = db.execute(count_statement).scalar_one()
+
+    # ````````````````SORTING``````````````````````
+    sort_column = getattr(Ticket, sort_by)
+    if sort_order == "asc":
+        statement = statement.order_by(sort_column.asc())
+    else:
+        statement = statement.order_by(sort_column.desc())
+
+    if sort_by != "created_at":
+        statement = statement.order_by(Ticket.created_at.desc())
+
+    # `````````````````````PAGINATION```````````````
     offset = (page - 1) * limit
-    statement = (statement.order_by(Ticket.created_at.desc()).offset(offset).limit(limit))
+    statement = statement.offset(offset).limit(limit)
 
     
     # /----------------------------------
     result = db.execute(statement)
-    return result.scalars().all()
+    tickets = result.scalars().all()
+    pages = ceil(total / limit) if total else 0
+
+    return {
+        "items": tickets,
+        "total": total,
+        "page" : page,
+        "limit": limit,
+        "pages": pages
+    }
 
 
 @router.get("/{ticket_id}", response_model=TicketResponse)
@@ -85,7 +121,7 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db), curr
     return new_ticket
 
 @router.patch("/{ticket_id}", response_model=TicketResponse)
-def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User =Depends(get_current_user), db: Session = Depends(get_db)):
+def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
@@ -110,7 +146,7 @@ def assign_ticket(data: TicketAssign, ticket_id: int, current_user: User = Depen
 
 
 @router.post("/{ticket_id}/unassign", response_model=TicketResponse)
-def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)),db: Session = Depends(get_db)):
+def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:

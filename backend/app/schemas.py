@@ -87,3 +87,11 @@ class CommentResponse(BaseModel):
 
 class TicketAssign(BaseModel):
     agent_id: int
+
+
+class TicketListResponse(BaseModel):
+    items: list [TicketResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int

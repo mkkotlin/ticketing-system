@@ -1,5 +1,6 @@
 from datetime import datetime
 
+# pyrefly: ignore [missing-import]
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -47,10 +48,11 @@ class TicketService:
 
                 ticket.assigned_to_id = agent.id
         ticket.updated_at = datetime.now()
+        return ticket
 
     @staticmethod
     def _update_status(ticket: Ticket, new_status: TicketStatus):
-        allowed_tansactions = {
+        allowed_transactions = {
             TicketStatus.OPEN:{ TicketStatus.IN_PROGRESS},
             TicketStatus.IN_PROGRESS: {TicketStatus.WAITING_FOR_CUSTOMER, TicketStatus.RESOLVED},
             TicketStatus.WAITING_FOR_CUSTOMER:{TicketStatus.IN_PROGRESS},
@@ -61,8 +63,8 @@ class TicketService:
         if new_status == current_status:
             return
 
-        if new_status not in allowed_tansactions[current_status]:
-            raise HTTPException(status_code=400, detail=(f"Invalid status transation: " f"{current_status} -> {new_status}"))
+        if new_status not in allowed_transactions[current_status]:
+            raise HTTPException(status_code=400, detail=(f"Invalid status transition: " f"{current_status} -> {new_status}"))
 
         ticket.status = new_status
         if new_status == TicketStatus.RESOLVED:
