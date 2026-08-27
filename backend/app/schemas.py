@@ -50,6 +50,12 @@ class TicketCreate(BaseModel):
     priority: TicketPriority = TicketPriority.MEDIUM
 
 
+class TicketUpdate(BaseModel):
+    status: TicketStatus | None = None
+    priority: TicketPriority | None = None
+    assigned_to_id: int | None = None
+
+
 class CategoryResponse(BaseModel):
     id: int
     name: str
@@ -58,3 +64,22 @@ class CategoryResponse(BaseModel):
 
 class CategoryCreate(BaseModel):
     name: str = Field(min_length=5, max_length=200)
+
+
+
+
+class CommentCreate(BaseModel):
+    content: str = Field(min_length=1, max_length=5000)
+
+
+
+class CommentResponse(BaseModel):
+    id: int
+    content: str
+    ticket_id: int
+    author_id: int
+    created_at: datetime
+
+    model_config={
+        "from_attributes":True
+    }

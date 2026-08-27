@@ -12,3 +12,8 @@ class TicketPriority(str, Enum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
+
+class UserRole(str, Enum):
+    ADMIN = "ADMIN"
+    AGENT = "AGENT"
+    CUSTOMER = "CUSTOMER"

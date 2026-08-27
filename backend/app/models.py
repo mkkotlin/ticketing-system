@@ -38,3 +38,25 @@ class Ticket(Base):
     creator: Mapped["User"] = relationship(foreign_keys=[created_by_id])
     assignee: Mapped["User | None"] = relationship(foreign_keys=[assigned_to_id])
     category: Mapped["Category"] = relationship()
+
+
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    ticketr_id: Mapped[int] = mapped_column(ForeignKey("tickets.id"), nullable=False)
+    author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda:datetime.now(), nullable=False)
+    ticket: Mapped["Ticket"] = relationship()
+    author: Mapped["User"] = relationship()
+
+    @property
+    def ticket_id(self) -> int:
+        return self.ticketr_id
+
+    @ticket_id.setter
+    def ticket_id(self, value: int):
+        self.ticketr_id = value
