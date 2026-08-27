@@ -11,6 +11,7 @@ from app.models import Category, Ticket, User
 from app.schemas import TicketResponse, TicketCreate
 from app.dependencies import get_current_user, require_role
 from app.services.ticket_service import TicketService
+from app.services.activitiy_service import ActivityService
 
 router = APIRouter(
     prefix="/tickets",
@@ -115,7 +116,10 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db), curr
         priority=ticket_data.priority,
         created_by_id=current_user.id
     )
+    
     db.add(new_ticket)
+    db.flush()
+    ActivityService.log(db=db, ticket_id=new_ticket.id, user_id=current_user.id,action="CREATED")
     db.commit()
     db.refresh(new_ticket)
     return new_ticket
@@ -139,7 +143,7 @@ def assign_ticket(data: TicketAssign, ticket_id: int, current_user: User = Depen
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id)
+    TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id, current_user_id=current_user.id)
     db.commit()
     db.refresh(ticket)
     return ticket

@@ -105,3 +105,15 @@ class UserRoleUpdate(BaseModel):
 
 class UserStatusUpdate(BaseModel):
     is_active: bool
+
+
+class TicketActivityResponse(BaseModel):
+    id: int
+    ticket_id: int
+    user_id: int
+    action: str
+    old_value: str | None
+    new_value: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

@@ -8,6 +8,7 @@ from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import Comment, Ticket, User
 from ..schemas import CommentCreate, CommentResponse
+from app.services.activitiy_service import ActivityService
 
 
 router = APIRouter(
@@ -35,6 +36,13 @@ def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: Us
         author_id=current_user.id
     )
     db.add(comment)
+    db.flush()
+    ActivityService.log(
+        db=db,
+        ticket_id=ticket.id,
+        user_id=current_user.id,
+        action="COMMENT_ADDED"
+    )
     db.commit()
     db.refresh(comment)
     return comment

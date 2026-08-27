@@ -60,3 +60,17 @@ class Comment(Base):
     @ticket_id.setter
     def ticket_id(self, value: int):
         self.ticketr_id = value
+
+
+class TicketActivity(Base):
+    __tablename__ = "ticket_activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ticket_id: Mapped[int] = mapped_column(ForeignKey("tickets.id"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    action: Mapped[str] = mapped_column(String(50), nullable=False)
+    old_value: Mapped[str | None] =  mapped_column(Text, nullable=True)
+    new_value: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(), nullable=False)
+    ticket: Mapped["Ticket"] = relationship()
+    user: Mapped["User"] = relationship()

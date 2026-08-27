@@ -13,6 +13,7 @@ from app.ticketing import ticket
 from app.category import category
 from app.Users import users
 from app.comments import comments
+from app.activities import activities
 
 
 
@@ -20,6 +21,7 @@ from app.comments import comments
 app = FastAPI(title="Ticketing System")
 
 
+app.include_router(activities.router)
 app.include_router(auth.router)
 app.include_router(category.router)
 app.include_router(comments.router)
