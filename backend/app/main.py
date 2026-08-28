@@ -20,7 +20,7 @@ from app.exception_handlers import app_exception_handler, unexpected_exception_h
 
 
 
-app = FastAPI(title="Ticketing System")
+app = FastAPI(title="Ticketing System", version="1.0.0")
 
 
 app.add_exception_handler(AppException, app_exception_handler)
