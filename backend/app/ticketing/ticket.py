@@ -12,6 +12,7 @@ from app.schemas import TicketResponse, TicketCreate
 from app.dependencies import get_current_user, require_role
 from app.services.ticket_service import TicketService
 from app.services.activitiy_service import ActivityService
+from app.exceptions import TicketNotFound, ForbiddenAction
 
 router = APIRouter(
     prefix="/tickets",
@@ -92,18 +93,18 @@ def get_ticket(ticket_id: int, current_user: User = Depends(get_current_user), d
     statement = select(Ticket).where(Ticket.id == ticket_id)
     ticket = db.execute(statement).scalar_one_or_none()
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     if current_user.role == UserRole.CUSTOMER:
         if ticket.created_by_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
         if ticket.assigned_to_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
     return ticket
 
 
-@router.post("/", response_model=TicketResponse, status_code=201)
+@router.post("", response_model=TicketResponse, status_code=201)
 def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_transaction), current_user: User = Depends(get_current_user)):
 
     category = db.execute(select(Category).where(Category.id == ticket_data.category_id)).scalar_one_or_none()
@@ -127,7 +128,7 @@ def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User 
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     TicketService.update_ticket(db = db, ticket=ticket, current_user=current_user, data=ticket_data)
     return ticket
@@ -137,7 +138,7 @@ def assign_ticket(ticket_id: int, data: TicketAssign, current_user: User = Depen
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id, current_user=current_user)
     return ticket
@@ -148,7 +149,7 @@ def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(Us
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     TicketService.unassign_ticket(ticket)
     return ticket

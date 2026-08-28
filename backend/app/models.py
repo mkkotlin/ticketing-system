@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, String, ForeignKey, Text, DateTime
+from sqlalchemy import Boolean, Index, String, ForeignKey, Text, DateTime
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
@@ -22,6 +22,15 @@ class Category(Base):
 
 class Ticket(Base):
     __tablename__ = "tickets"
+    __table_args__ = (
+        Index("ix_tickets_status", "status"),
+        Index("ix_tickets_priority", "priority"),
+        Index("ix_tickets_created_by", "created_by_id"),
+        Index("ix_tickets_assigned_to", "assigned_to_id"),
+        Index("ix_tickets_category", "category_id"),
+        Index("ix_tickets_assigned_status", "assigned_to_id", "status"),
+        Index("ix_tickets_creator_status", "created_by_id", "status"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -49,7 +58,7 @@ class Comment(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    ticketr_id: Mapped[int] = mapped_column(ForeignKey("tickets.id"), nullable=False)
+    ticketr_id: Mapped[int] = mapped_column(ForeignKey("tickets.id"), nullable=False, index=True)
     author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda:datetime.now(), nullable=False)
     ticket: Mapped["Ticket"] = relationship()

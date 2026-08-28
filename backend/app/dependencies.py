@@ -8,6 +8,8 @@ from app.database import get_db
 from app.models import User
 from app.security import decode_access_token
 from collections.abc import Callable
+from app.exceptions import AccountInactive, ForbiddenAction
+
 
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -46,16 +48,13 @@ def get_current_user(
         raise credentials_exception
 
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="User account is inactive")
+        raise AccountInactive()
 
     return user
 
 def require_role(*allowed_roles: str)-> Callable:
     def role_checker(current_user: User = Depends(get_current_user)) -> User:
         if current_user.role not in allowed_roles:
-            raise HTTPException(
-                status_code=403,
-                detail="You do not have permission to perform this action"
-            )
+            raise ForbiddenAction("You do not have permission to perform this action")
         return current_user
     return role_checker

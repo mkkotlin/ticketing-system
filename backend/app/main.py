@@ -14,6 +14,8 @@ from app.category import category
 from app.Users import users
 from app.comments import comments
 from app.activities import activities
+from app.exceptions import AppException
+from app.exception_handlers import app_exception_handler, unexpected_exception_handler
 
 
 
@@ -21,6 +23,12 @@ from app.activities import activities
 app = FastAPI(title="Ticketing System")
 
 
+app.add_exception_handler(AppException, app_exception_handler)
+app.add_exception_handler(Exception, unexpected_exception_handler)
+
+@app.get("/")
+def root():
+    return {"message": "Ticketing System API"}
 app.include_router(activities.router)
 app.include_router(auth.router)
 app.include_router(category.router)

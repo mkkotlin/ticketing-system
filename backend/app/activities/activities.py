@@ -6,6 +6,8 @@ from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import Ticket, TicketActivity, User
 from ..schemas import TicketActivityResponse
+from app.exceptions import TicketNotFound, ForbiddenAction
+
 
 
 router = APIRouter(
@@ -29,26 +31,17 @@ def get_activities(
     ).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Ticket not found"
-        )
+        raise TicketNotFound()
 
     # CUSTOMER → own ticket
     if current_user.role == "CUSTOMER":
         if ticket.created_by_id != current_user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="You do not have access to this ticket"
-            )
+            raise ForbiddenAction("You do not have access to this ticket")
 
     # AGENT → assigned ticket
     elif current_user.role == "AGENT":
         if ticket.assigned_to_id != current_user.id:
-            raise HTTPException(
-                status_code=403,
-                detail="You do not have access to this ticket"
-            )
+            raise ForbiddenAction("You do not have access to this ticket")
 
     result = db.execute(
         select(TicketActivity)

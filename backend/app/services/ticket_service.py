@@ -9,23 +9,24 @@ from ..enums import TicketStatus, UserRole
 from ..models import Ticket, User
 from ..schemas import TicketUpdate
 from app.services.activitiy_service import ActivityService
+from app.exceptions import ForbiddenAction, UserNotFound, InvalidStatusTransition
 
 class TicketService:
     @staticmethod
     def update_ticket(db: Session, ticket: Ticket, current_user: User, data:TicketUpdate) -> Ticket:
         if current_user.role == UserRole.CUSTOMER:
-            raise HTTPException(status_code=403, detail="Customers cannot update tickets")
+            raise ForbiddenAction("Customers cannot update tickets")
 
         # --------------------------AGENT-------------------------
         if current_user.role == UserRole.AGENT:
             if ticket.assigned_to_id != current_user.id:
-                raise HTTPException(status_code=403, detail="You can only update tickets assigned to you")
+                raise ForbiddenAction("You can only update tickets assigned to you")
 
             if data.assigned_to_id is not None:
-                raise HTTPException(status_code=403, detail="Agents cannot reassign tickets")
+                raise ForbiddenAction("Agents cannot reassign tickets")
 
             if data.priority is not None:
-                raise HTTPException(status_code=403, detail="Agents cannot change ticket priority")
+                raise ForbiddenAction("Agents cannot change ticket priority")
 
             if data.status is not None:
                 TicketService._update_status(db, ticket, data.status, current_user.id)
@@ -51,7 +52,7 @@ class TicketService:
                 agent = db.execute(select(User).where(User.id == data.assigned_to_id)).scalar_one_or_none()
 
                 if agent is None:
-                    raise HTTPException(status_code=404, detail="User not found")
+                    raise UserNotFound()
 
                 if agent.role != UserRole.AGENT:
                     raise HTTPException(status_code=400, detail="Ticket can only be assigned to an agent")
@@ -74,7 +75,7 @@ class TicketService:
             return
 
         if new_status not in allowed_transactions[current_status]:
-            raise HTTPException(status_code=400, detail=(f"Invalid status transition: " f"{current_status} -> {new_status}"))
+            raise InvalidStatusTransition(current_status.value, new_status.value)
 
         old_value = ticket.status.value
 
@@ -103,7 +104,7 @@ class TicketService:
         agent = db.execute(select(User).where(User.id == agent_id)).scalar_one_or_none()
 
         if agent is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFound()
 
         if agent.role != UserRole.AGENT:
             raise HTTPException(status_code=400, detail="Ticket can only be assigned to an agent")

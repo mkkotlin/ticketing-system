@@ -9,6 +9,7 @@ from ..dependencies import get_current_user
 from ..models import Comment, Ticket, User
 from ..schemas import CommentCreate, CommentResponse
 from app.services.activitiy_service import ActivityService
+from app.exceptions import TicketNotFound, ForbiddenAction
 
 
 router = APIRouter(
@@ -21,14 +22,14 @@ def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: Us
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     if current_user.role == UserRole.CUSTOMER:
         if ticket.created_by_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
         if ticket.assigned_to_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
 
     comment = Comment(
         content=comment_data.content, 
@@ -52,14 +53,14 @@ def get_comments(ticket_id: int, current_user: User = Depends(get_current_user),
     ticket = db.execute(select(Ticket).where(Ticket.id == ticket_id)).scalar_one_or_none()
 
     if ticket is None:
-        raise HTTPException(status_code=404, detail="Ticket not found")
+        raise TicketNotFound()
 
     if current_user.role == UserRole.CUSTOMER:
         if ticket.created_by_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
         if ticket.assigned_to_id != current_user.id:
-            raise HTTPException(status_code=403, detail="You do not have access to this ticket")
+            raise ForbiddenAction("You do not have access to this ticket")
 
     result = db.execute(select(Comment).where(Comment.ticketr_id == ticket_id).order_by(Comment.created_at))
 
