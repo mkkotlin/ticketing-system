@@ -70,6 +70,9 @@ def load_fixtures():
             created_by_id = user_id_map.get(username)
             category_id = t_data["category_id"]
 
+            assigned_to_username = t_data.get("assigned_to_username")
+            assigned_to_id = user_id_map.get(assigned_to_username) if assigned_to_username else None
+
             # Check if ticket already exists (by title)
             existing_ticket = db.query(Ticket).filter(Ticket.title == t_data["title"]).first()
             if not existing_ticket:
@@ -80,7 +83,8 @@ def load_fixtures():
                     status=t_data["status"],
                     priority=t_data["priority"],
                     category_id=category_id,
-                    created_by_id=created_by_id
+                    created_by_id=created_by_id,
+                    assigned_to_id=assigned_to_id
                 )
                 db.add(ticket)
             else:

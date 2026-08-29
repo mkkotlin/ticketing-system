@@ -30,6 +30,13 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+class CategoryResponse(BaseModel):
+    id: int
+    name: str
+
+    model_config = {"from_attributes":True}
+
+
 class TicketResponse(BaseModel):
     id: int
     title: str
@@ -43,6 +50,10 @@ class TicketResponse(BaseModel):
     updated_at: datetime | None = None
     resolved_at: datetime | None = None
     closed_by_id: int | None = None
+
+    category: CategoryResponse | None = None
+    created_by: UserResponse | None = None
+    assigned_to: UserResponse | None = None
         
     model_config = { "from_attributes": True }
 
@@ -81,6 +92,8 @@ class CommentResponse(BaseModel):
     content: str
     ticket_id: int
     author_id: int
+    user_id: int
+    user: UserResponse | None = None
     created_at: datetime
 
     model_config={

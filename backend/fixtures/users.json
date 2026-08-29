@@ -28,5 +28,35 @@
     "email": "john@example.com",
     "password": "Password123",
     "role": "CUSTOMER"
+  },
+  {
+    "username": "alex",
+    "email": "alex@example.com",
+    "password": "Password123",
+    "role": "CUSTOMER"
+  },
+  {
+    "username": "Oggy",
+    "email": "oggy@example.com",
+    "password": "Password123",
+    "role": "CUSTOMER"
+  },
+  {
+    "username": "Smith",
+    "email": "smith@example.com",
+    "password": "Password123",
+    "role": "AGENT"
+  },
+  {
+    "username": "Titanium",
+    "email": "titanium@example.com",
+    "password": "Password123",
+    "role": "AGENT"
+  },
+  {
+    "username": "Boot",
+    "email": "boot@example.com",
+    "password": "Password123",
+    "role": "ADMIN"
   }
 ]

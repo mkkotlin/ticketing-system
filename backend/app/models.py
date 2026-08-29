@@ -50,6 +50,14 @@ class Ticket(Base):
     closed_by: Mapped["User | None"] = relationship(foreign_keys=[closed_by_id])
     category: Mapped["Category"] = relationship()
 
+    @property
+    def created_by(self) -> "User":
+        return self.creator
+
+    @property
+    def assigned_to(self) -> "User | None":
+        return self.assignee
+
 
 
 
@@ -71,6 +79,14 @@ class Comment(Base):
     @ticket_id.setter
     def ticket_id(self, value: int):
         self.ticketr_id = value
+
+    @property
+    def user_id(self) -> int:
+        return self.author_id
+
+    @property
+    def user(self) -> "User":
+        return self.author
 
 
 class TicketActivity(Base):

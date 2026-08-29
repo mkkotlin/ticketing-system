@@ -13,7 +13,8 @@
     "status": "IN_PROGRESS",
     "priority": "CRITICAL",
     "category_id": 2,
-    "created_by_username": "customer_john"
+    "created_by_username": "customer_john",
+    "assigned_to_username": "Smith"
   },
   {
     "title": "Add dark mode to user settings",
@@ -22,5 +23,92 @@
     "priority": "LOW",
     "category_id": 3,
     "created_by_username": "customer_john"
+  },
+  {
+    "title": "VPN connection drops frequently",
+    "description": "The VPN drops connection every 15 minutes since the latest update. Blocking work.",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "category_id": 1,
+    "created_by_username": "alex"
+  },
+  {
+    "title": "Refund request for unused license",
+    "description": "We mistakenly bought one extra user license last month and would like a refund.",
+    "status": "RESOLVED",
+    "priority": "MEDIUM",
+    "category_id": 2,
+    "created_by_username": "alex",
+    "assigned_to_username": "Titanium"
+  },
+  {
+    "title": "Keyboard shortcut settings",
+    "description": "It would be great to customize hotkeys in the web dashboard interface.",
+    "status": "OPEN",
+    "priority": "LOW",
+    "category_id": 3,
+    "created_by_username": "Oggy"
+  },
+  {
+    "title": "Payment gateway timeout",
+    "description": "Stripe checkout times out when users pay from regions outside US/EU. Error code 504.",
+    "status": "IN_PROGRESS",
+    "priority": "CRITICAL",
+    "category_id": 2,
+    "created_by_username": "Oggy",
+    "assigned_to_username": "kimiko"
+  },
+  {
+    "title": "API rate limits warning",
+    "description": "We are hitting rate limit headers early in the day. Can we get an upgrade?",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "category_id": 1,
+    "created_by_username": "Oggy"
+  },
+  {
+    "title": "Invoice email PDF attachment missing",
+    "description": "The automated billing emails do not contain the invoice PDF anymore since last Tuesday.",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "category_id": 2,
+    "created_by_username": "alex",
+    "assigned_to_username": "Smith"
+  },
+  {
+    "title": "Database slow query warning",
+    "description": "Slow query logs indicate full table scans on the tickets search query. Performance index needed.",
+    "status": "IN_PROGRESS",
+    "priority": "HIGH",
+    "category_id": 1,
+    "created_by_username": "support_agent",
+    "assigned_to_username": "Smith"
+  },
+  {
+    "title": "Broken link in support documentation",
+    "description": "The 'Getting Started' article redirects to a page that returns 404.",
+    "status": "RESOLVED",
+    "priority": "LOW",
+    "category_id": 3,
+    "created_by_username": "customer_john",
+    "assigned_to_username": "support_agent"
+  },
+  {
+    "title": "Slack integration feature request",
+    "description": "Customers are requesting notifications to be pushed directly to Slack channels.",
+    "status": "CLOSED",
+    "priority": "LOW",
+    "category_id": 3,
+    "created_by_username": "alex",
+    "assigned_to_username": "Titanium"
+  },
+  {
+    "title": "Email server authentication failure",
+    "description": "Outgoing SMTP connection rejected due to invalid certificate error in production logs.",
+    "status": "CLOSED",
+    "priority": "CRITICAL",
+    "category_id": 1,
+    "created_by_username": "customer_john",
+    "assigned_to_username": "support_agent"
   }
 ]
