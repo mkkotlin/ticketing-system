@@ -35,7 +35,7 @@ def get_tickets(search: str | None = None,
     if current_user.role == UserRole.CUSTOMER:
         statement = statement.where(Ticket.created_by_id == current_user.id)
     elif current_user.role == UserRole.AGENT:
-        statement = statement.where(Ticket.assigned_to_id == current_user.id)
+        statement = statement.where((Ticket.assigned_to_id == current_user.id) | (Ticket.created_by_id == current_user.id))
     elif current_user.role == UserRole.ADMIN:
         pass
 
@@ -99,7 +99,7 @@ def get_ticket(ticket_id: int, current_user: User = Depends(get_current_user), d
         if ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
-        if ticket.assigned_to_id != current_user.id:
+        if ticket.assigned_to_id != current_user.id and ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
     return ticket
 

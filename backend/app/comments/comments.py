@@ -28,7 +28,7 @@ def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: Us
         if ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
-        if ticket.assigned_to_id != current_user.id:
+        if ticket.assigned_to_id != current_user.id and ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
 
     comment = Comment(
@@ -61,7 +61,7 @@ def get_comments(ticket_id: int, current_user: User = Depends(get_current_user),
         if ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
     elif current_user.role == UserRole.AGENT:
-        if ticket.assigned_to_id != current_user.id:
+        if ticket.assigned_to_id != current_user.id and ticket.created_by_id != current_user.id:
             raise ForbiddenAction("You do not have access to this ticket")
 
     result = db.execute(select(Comment).where(Comment.ticketr_id == ticket_id).order_by(Comment.created_at))

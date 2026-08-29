@@ -1,19 +1,24 @@
 import os
 import json
+from sqlalchemy import text
 from app.database import SessionLocal
-from app.models import User, Category, Ticket
+from app.models import User, Category, Ticket, Comment, TicketActivity
 from app.security import hash_password
 
 def load_fixtures():
     db = SessionLocal()
     try:
+        print("--- Clearing existing database data and resetting sequences ---")
+        db.execute(text("TRUNCATE TABLE ticket_activities, comments, tickets, categories, \"user\" RESTART IDENTITY CASCADE;"))
+        db.commit()
+
         # Determine the paths of the fixture files
         current_dir = os.path.dirname(os.path.abspath(__file__))
         users_file = os.path.join(current_dir, "users.json")
         categories_file = os.path.join(current_dir, "categories.json")
         tickets_file = os.path.join(current_dir, "tickets.json")
 
-        print("--- Loading Users ---")
+        print("\n--- Loading Users ---")
         with open(users_file, "r") as f:
             users_data = json.load(f)
         

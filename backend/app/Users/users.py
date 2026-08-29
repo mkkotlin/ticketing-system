@@ -24,8 +24,11 @@ router = APIRouter(
 
 
 @router.get("", response_model=list[UserResponse])
-def get(user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
-    result = db.execute(select(User).order_by(User.id))
+def get(role: UserRole | None = None, user: User = Depends(require_role(UserRole.ADMIN)), db: Session = Depends(get_db)):
+    statement = select(User)
+    if role is not None:
+        statement = statement.where(User.role == role)
+    result = db.execute(statement.order_by(User.id))
     return result.scalars().all()
 
 @router.get("/{user_id}", response_model=UserResponse)
