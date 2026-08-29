@@ -44,6 +44,8 @@ def create_comment(ticket_id: int, comment_data: CommentCreate, current_user: Us
         user_id=current_user.id,
         action="COMMENT_ADDED"
     )
+    db.commit()
+    db.refresh(comment)
     return comment
 
 

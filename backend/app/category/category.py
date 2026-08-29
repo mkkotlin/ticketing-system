@@ -27,5 +27,7 @@ def create_category(category_data: CategoryCreate, db: Session = Depends(get_tra
     new_category = Category(name = category_data.name)
     db.add(new_category)
     db.flush()
+    db.commit()
+    db.refresh(new_category)
 
     return CategoryResponse.model_validate(new_category)

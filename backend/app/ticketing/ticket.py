@@ -121,6 +121,8 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_transacti
     db.add(new_ticket)
     db.flush()
     ActivityService.log(db=db, ticket_id=new_ticket.id, user_id=current_user.id, action="CREATED")
+    db.commit()
+    db.refresh(new_ticket)
     return new_ticket
 
 @router.patch("/{ticket_id}", response_model=TicketResponse)
@@ -131,6 +133,8 @@ def update_ticket(ticket_id: int, ticket_data: TicketUpdate, current_user: User 
         raise TicketNotFound()
 
     TicketService.update_ticket(db = db, ticket=ticket, current_user=current_user, data=ticket_data)
+    db.commit()
+    db.refresh(ticket)
     return ticket
 
 @router.post("/{ticket_id}/assign", response_model=TicketResponse)
@@ -141,6 +145,8 @@ def assign_ticket(ticket_id: int, data: TicketAssign, current_user: User = Depen
         raise TicketNotFound()
 
     TicketService.assign_ticket(db=db, ticket=ticket, agent_id=data.agent_id, current_user=current_user)
+    db.commit()
+    db.refresh(ticket)
     return ticket
 
 
@@ -152,4 +158,6 @@ def unassign_ticket(ticket_id: int, current_user: User = Depends(require_role(Us
         raise TicketNotFound()
 
     TicketService.unassign_ticket(ticket)
+    db.commit()
+    db.refresh(ticket)
     return ticket

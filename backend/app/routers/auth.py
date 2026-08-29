@@ -35,6 +35,8 @@ def register(user_data: UserCreate, db: Session = Depends(get_transaction)):
     )
     db.add(user)
     db.flush()
+    db.commit()
+    db.refresh(user)
 
     return user
 

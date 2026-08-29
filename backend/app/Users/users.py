@@ -46,6 +46,8 @@ def update_user_role(user_id: int, data: UserRoleUpdate, current_user: User = De
         raise HTTPException(status_code=400, detail="You cannot chnage your own role")
 
     user.role = data.role
+    db.commit()
+    db.refresh(user)
     return user
 
 
@@ -60,6 +62,7 @@ def delete_user(user_id: int, current_user: User = Depends(require_role(UserRole
         raise HTTPException(status_code=400, detail="You cannot delete yourself")
 
     db.delete(user)
+    db.commit()
 
 
 @router.patch("/{user_id}/status", response_model=UserResponse)
@@ -73,6 +76,8 @@ def solt_delete(user_id: int, data: UserStatusUpdate, current_user: User = Depen
         raise HTTPException(status_code=400, detail="You cannot change your own account status")
 
     user.is_active = data.is_active
+    db.commit()
+    db.refresh(user)
     return user
 
 

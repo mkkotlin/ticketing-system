@@ -25,7 +25,7 @@ def get_db():
         db.close()
 
 def get_transaction():
-    db: Session = SessionLocal()
+    db = SessionLocal()
 
     try:
         yield db
