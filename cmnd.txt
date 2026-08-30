@@ -7,6 +7,6 @@ alembic init alembic
 
 
 to deplaoy to fastapi cloud
-step 1
-    activate env
-    (.venv) PS I:\React_JS\FastReactTicket\ticketing-system\backend> fastapi deploy
+step 1    open dir in terminal => I:\React_JS\FastReactTicket\ticketing-system\backend
+step 2    activate env
+step 3    (.venv) PS I:\React_JS\FastReactTicket\ticketing-system\backend> fastapi deploy
