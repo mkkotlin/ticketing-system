@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ticketing-backend"
+version = "0.1.0"
+description = "FastAPI Ticketing System"
+requires-python = ">=3.11"
+
+dependencies = [
+    "fastapi[standard]",
+    "uvicorn[standard]",
+    "sqlalchemy",
+    "alembic",
+    "psycopg[binary]",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "python-multipart",
+    "pydantic-settings",
+    "pyjwt",
+    "pwdlib",
+    "argon2-cffi",
+    "email-validator"
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
