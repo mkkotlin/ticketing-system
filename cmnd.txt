@@ -1,0 +1,12 @@
+fastapi dev app/main.py
+$env:PYTHONUTF8=1
+$env:PYTHONPATH="."; $env:PYTHONUTF8=1;
+alembic upgrade head
+alembic revision --autogenerate -m "create users table"
+alembic init alembic
+
+
+to deplaoy to fastapi cloud
+step 1
+    activate env
+    (.venv) PS I:\React_JS\FastReactTicket\ticketing-system\backend> fastapi deploy
